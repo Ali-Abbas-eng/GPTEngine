@@ -6,6 +6,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OPENAI_API_KEY_FILE = os.path.join(BASE_DIR, 'secret', 'OpenAI', 'API_KEY.txt')
 OPENAI_API_KEY = open(OPENAI_API_KEY_FILE).read()
 
+ASSEMBLYAI_API_KEY_FILE = os.path.join(BASE_DIR, 'secret', 'AssemblyAI', 'API_KEY.txt')
+ASSEMBLYAI_API_KEY = open(ASSEMBLYAI_API_KEY_FILE).read()
+
 IELTS_PART_1_PROMPT_FILE = os.path.join(BASE_DIR, 'secret', 'IELTS', 'PART_1_SYSTEM_PROMPT.txt')
 IELTS_PART_1_PROMPT = open(IELTS_PART_1_PROMPT_FILE).read()
 

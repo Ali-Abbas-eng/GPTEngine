@@ -7,6 +7,7 @@ from typing import Union
 import openai
 from .globals import (
     OPENAI_API_KEY,
+    ASSEMBLYAI_API_KEY,
     IELTS_PART_1_PROMPT,
     IELTS_PART_2_PROMPT,
     IELTS_PART_3_PROMPT,
@@ -90,7 +91,7 @@ class TextToSpeechEngine:
 
 
 class SpeechToTextEngine:
-    def __init__(self, api_key: Union[str, os.PathLike] = OPENAI_API_KEY):
+    def __init__(self, api_key: Union[str, os.PathLike] = ASSEMBLYAI_API_KEY):
         aai.settings.api_key = api_key
         self.assembly_ai_service_handle = aai.Transcriber()
 
