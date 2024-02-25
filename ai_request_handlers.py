@@ -5,9 +5,9 @@ import os
 import boto3
 from typing import Union
 import openai
-from .globals import (
-    OPENAI_API_KEY,
-    ASSEMBLYAI_API_KEY,
+from environs import Env
+
+from gptengine.globals import (
     IELTS_PART_1_PROMPT,
     IELTS_PART_2_PROMPT,
     IELTS_PART_3_PROMPT,
@@ -15,13 +15,10 @@ from .globals import (
     IELTS_PART_2_DUMMY_START_TRIGGER,
     IELTS_PART_3_DUMMY_START_TRIGGER,
     IELTS_POSSIBLE_TOPICS_LIST,
-    AWS_API_KEY,
-    AWS_ACCESS_KEY_ID,
-    AWS_REGION_NAME,
-    AWS_POLY_VOICE_ID,
-    AWS_POLY_OUTPUT_FORMAT,
-    AWS_POLY_OUTPUT_DIRECTORY
 )
+
+env = Env()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TextToSpeechEngine:
@@ -35,13 +32,14 @@ class TextToSpeechEngine:
                                                       output_directory)
         text_to_speech_converter("text you'd like to here read aloud", file_id) -> audio file in specified output dir
     """
+
     def __init__(self,
-                 secret_access_key: Union[str, os.PathLike] = AWS_API_KEY,
-                 access_key_id: Union[str, os.PathLike] = AWS_ACCESS_KEY_ID,
-                 region_name_file: Union[str, os.PathLike] = AWS_REGION_NAME,
-                 voice_id: str = AWS_POLY_VOICE_ID,
-                 output_format: str = AWS_POLY_OUTPUT_FORMAT,
-                 output_directory: Union[str, os.PathLike] = AWS_POLY_OUTPUT_DIRECTORY):
+                 secret_access_key: Union[str, os.PathLike] = env.str("AWS_SECRET_ACCESS_KEY"),
+                 access_key_id: Union[str, os.PathLike] = env.str("AWS_ACCESS_KEY_ID"),
+                 region_name_file: Union[str, os.PathLike] = env.str("AWS_REGION_NAME"),
+                 voice_id: str = env.str("AWS_VOICE_ID"),
+                 output_format: str = env.str("AWS_POLY_OUTPUT_FORMAT"),
+                 output_directory: Union[str, os.PathLike] = os.path.join(BASE_DIR, 'output', 'audios')):
         """
         initialise the Text to Speech Engine with the variable representing the Amazon Polly Account Configurations.
         :param secret_access_key: str or os.PathLike, /path/to/SECRET_ACCESS_KEY.txt.
@@ -91,7 +89,7 @@ class TextToSpeechEngine:
 
 
 class SpeechToTextEngine:
-    def __init__(self, api_key: Union[str, os.PathLike] = ASSEMBLYAI_API_KEY):
+    def __init__(self, api_key: Union[str, os.PathLike] = env.str('ASSEMBLYAI_API_KEY')):
         aai.settings.api_key = api_key
         self.assembly_ai_service_handle = aai.Transcriber()
 
@@ -115,7 +113,7 @@ class ChatGPTIELTSExaminer:
         """
         Initializes the ChatGPTIELTSExaminer class.
         """
-        openai.api_key = OPENAI_API_KEY
+        openai.api_key = env.str('OPENAI_API_KEY')
         self.session_topic = random.choice(IELTS_POSSIBLE_TOPICS_LIST)
         self.part_prompts = [
             IELTS_PART_1_PROMPT,
@@ -206,7 +204,7 @@ class BaseConversationalist:
         """
         Initializes the ChatGPTIELTSExaminer class.
         """
-        openai.api_key = OPENAI_API_KEY
+        openai.api_key = env.str('OPENAI_API_KEY')
         self.speech_to_text_engine = SpeechToTextEngine()
         self.text_to_speech_engine = TextToSpeechEngine()
         self.media_root = media_root
