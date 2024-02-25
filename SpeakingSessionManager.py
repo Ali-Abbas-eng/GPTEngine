@@ -1,73 +1,41 @@
-from ai_request_handlers import SpeechToTextEngine, TextToSpeechEngine, ChatGPTIELTSExaminer
-from globals import END_OF_IELTS_SPEAKING_SESSION
+from gptengine.conversationalists.general_conversationalist import GeneralConversationalist
+from gptengine.utils.text_to_speech import TextToSpeechEngine
+from gptengine.utils.speech_to_text import SpeechToTextEngine
 
 
 class SpeakingSessionManager:
-    """
-    Manages an IELTS speaking session with a student, handling questions and responses.
-    """
 
-    def __init__(self, number_of_questions: int = 8, verbose: bool = True):
-        """
-        Initialize a SpeakingSessionManager.
+    def __init__(self,
+                 text_to_text_engine: GeneralConversationalist,
+                 number_of_questions: int = 5,
+                 verbose: bool = True,
+                 text_to_speech_engine: TextToSpeechEngine = TextToSpeechEngine(),
+                 speech_to_text_engine: SpeechToTextEngine = SpeechToTextEngine()):
 
-        Args:
-            number_of_questions (int): The number of questions in the session.
-            verbose (bool): Whether to print verbose output.
-        """
-        self.text_to_speech_engine = TextToSpeechEngine()
-        self.speech_to_text_engine = SpeechToTextEngine()
-        self.text_to_text_chat_gpt = ChatGPTIELTSExaminer()
+        self.text_to_speech_engine = text_to_speech_engine
+        self.speech_to_text_engine = speech_to_text_engine
+        self.text_to_text_engine = text_to_text_engine
         self.number_of_questions = number_of_questions
         self.current_question_index = 0
-        self.current_examination_part = -1
         self.end_of_speaking_session = False
         self.verbose = verbose
 
-    def __call__(self, audio_file_url, response_file_id, *args, **kwargs):
-        """
-        Process a student's response to an IELTS speaking question.
-
-        Args:
-            audio_file_url (str): URL of the student's audio response.
-            response_file_id (int): Identifier for the response file.
-
-        Returns:
-            dict: A dictionary with audio and text transcription of the examiner's response.
-        """
-        if self.current_question_index % self.number_of_questions == 0:
-            # Start a new examination part or finish the session if it's the third part.
-            self.current_question_index = 0
-            self.current_examination_part += 1
-            if self.current_examination_part == 1:
-                # If it's part 1, skip the initial questions.
-                self.current_question_index += self.number_of_questions
-            if self.current_examination_part == 3:
-                # If it's part 3, mark the end of the session.
-                self.end_of_speaking_session = True
-                return {
-                    "audio": self.text_to_speech_engine(END_OF_IELTS_SPEAKING_SESSION, response_file_id),
-                    "text_transcription": END_OF_IELTS_SPEAKING_SESSION
-                }
-            examiner_response = self.text_to_text_chat_gpt.initialise_test_part(self.current_examination_part)
-            if self.verbose:
-                print(f'Transcription of your response: {examiner_response}')
-
-        else:
-            # Process the student's response.
-            answer_text = self.speech_to_text_engine(audio_file_url)
-            if self.verbose:
-                print(f"Transcription of your response: {answer_text}")
-            examiner_response = self.text_to_text_chat_gpt(answer_text)
-
-        audio_examiner_response_audio_file = self.text_to_speech_engine(examiner_response, response_file_id)
-        if self.verbose:
-            print(f'Transcription of your response: {examiner_response}')
+    def __call__(self, audio, output_file, *args, **kwargs):
         self.current_question_index += 1
 
+        # Convert user's audio answer to text
+        answer_text = self.speech_to_text_engine(audio)
+
+        # Get the relevant response from AI Engine
+        response_text = self.text_to_text_engine(answer_text)
+
+        # Convert AI Engine's response from text to audio
+        response_audio = self.text_to_speech_engine(response_text, output_file)
+
         return {
-            "audio": audio_examiner_response_audio_file,
-            "text_transcription": examiner_response
+            "audio": response_audio,
+            "response_text": response_text,
+            "answer_text": answer_text
         }
 
 
