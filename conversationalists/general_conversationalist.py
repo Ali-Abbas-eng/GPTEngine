@@ -34,7 +34,8 @@ class GeneralConversationalist:
         try:
             completion = self.client.chat.completions.create(
                 model="gpt-3.5-turbo-16k-0613",
-                messages=self.chat_history
+                messages=self.chat_history,
+                temperature=0
             )
             response_role = completion.choices[0].message.role
             response_content = completion.choices[0].message.content
@@ -68,6 +69,7 @@ class GeneralConversationalist:
                 {
                     "role": "user",
                     "content": answer
+
                 }
             )
         else:  #
