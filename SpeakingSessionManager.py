@@ -23,8 +23,13 @@ class SpeakingSessionManager:
     def __call__(self, audio, output_file, *args, **kwargs):
         self.current_question_index += 1
 
-        # Convert user's audio answer to text
-        answer_text = self.speech_to_text_engine(audio)
+        # if this is the beginning of the conversation
+        answer_text = None
+
+        # otherwise the user has sent an audio
+        if audio is not None:
+            # Convert user's audio answer to text
+            answer_text = self.speech_to_text_engine(audio)
 
         # Get the relevant response from AI Engine
         response_text = self.text_to_text_engine(answer_text)
