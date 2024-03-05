@@ -47,7 +47,7 @@ class BaseConversationalist:
         self.chat_history.append(transcript)
         text_response = "This is a dummy response, later to be replaced with ChatGPT responses."
         audio_response = self.text_to_speech_engine(text_response, file_id=message_id)
-        audio_url = 'http://127.0.0.1:8000/media/audios/' + str(message_id) + '.wav'
+        audio_url = f'http://{env.str("SERVER_IP")}:{env.str("SERVER_PORT")}/media/audios/' + str(message_id) + '.wav'
         return {
             'user_transcript': transcript,
             'gpt_response': text_response,
