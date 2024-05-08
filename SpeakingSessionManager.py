@@ -25,7 +25,7 @@ class SpeakingSessionManager:
         self.end_of_speaking_session = False
         self.verbose = verbose
 
-    def __call__(self, audio, output_file, *args, **kwargs):
+    def __call__(self, audio, output_file, is_partial_response, *args, **kwargs):
         self.current_question_index += 1
         if self.current_question_index == self.number_of_questions:
             answer_text = "This is the end of the speaking session, thank you very much for attending the IELTS test."
@@ -44,7 +44,7 @@ class SpeakingSessionManager:
             answer_text = self.speech_to_text_engine(audio)
 
         # Get the relevant response from AI Engine
-        response_text = self.text_to_text_engine(answer_text)
+        response_text = self.text_to_text_engine(answer_text, is_partial_response)
 
         # Convert AI Engine's response from text to audio
         response_audio = self.text_to_speech_engine(response_text, output_file)
