@@ -50,7 +50,7 @@ class GeneralConversationalist:
             response_content = None
         return response_content
 
-    def __call__(self, answer, *args, **kwargs):
+    def __call__(self, answer, is_partial_response: bool = False, *args, **kwargs):
         """
         Add the user's answer to the chat history and get a response from the GPT-3 model.
         """
@@ -58,7 +58,10 @@ class GeneralConversationalist:
             self.chat_history.append(
                 {
                     "role": "user",
-                    "content": answer
+                    "content": str({
+                        "part": 1 if is_partial_response else 2,
+                        "text": answer
+                    })
 
                 }
             )
